@@ -135,7 +135,7 @@ class LRU {
      * explicitly maps the key to null. The 'has' operation may be used to distinguish these two
      * cases.
      * @param {string} key the key whose associated value is to be returned
-     * @returns the value to which the specified key is mapped, or null if there was no mapping for key.
+     * @returns {*} the value to which the specified key is mapped, or null if there was no mapping for key.
      */
     get(key) {
         const {_linkedList: linkedList, _map: map} = this;

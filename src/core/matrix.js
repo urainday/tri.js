@@ -55,17 +55,18 @@ export function clone(m) {
  * @return out, return null if m is not invertible
  */
 export function invert(out, m) {
-    const det = m[0] * m[3] - m[1] * m[2];
+    const [m0, m1, m2, m3, m4, m5] = m;
+    const det = m0 * m3 - m1 * m2;
     if (!det) {
         return null;
     }
 
-    out[0] =  m[3] / det;
-    out[1] = -m[1] / det;
-    out[2] = -m[2] / det;
-    out[3] = m[0] / det;
-    out[4] = (m[2] * m[5] - m[3] * m[4]) / det;
-    out[5] = (m[1] * m[4] - m[0] * m[5]) / det;
+    out[0] =  m3 / det;
+    out[1] = -m1 / det;
+    out[2] = -m2 / det;
+    out[3] = m0 / det;
+    out[4] = (m2 * m5 - m3 * m4) / det;
+    out[5] = (m1 * m4 - m0 * m5) / det;
 
     return out;
 }
@@ -96,14 +97,15 @@ export function scale(out, m, v) {
  * @param {vec2} v vector to skew the matrix by
  */
 export function skew(out, m, v) {
+    const [m0, m1, m2, m3, m4, m5] = m;
     const tx = Math.tan(v[0]);
     const ty = Math.tan(v[1]);
-    out[0] = m[0] + tx * m[1];
-    out[1] = ty * m[0] + m[1];
-    out[2] = m[2] + tx * m[3];
-    out[3] = ty * m[2] + m[3];
-    out[4] = m[4] + tx * m[5];
-    out[5] = ty * m[4] + m[5];
+    out[0] = m0 + tx * m1;
+    out[1] = ty * m0 + m1;
+    out[2] = m2 + tx * m3;
+    out[3] = ty * m2 + m3;
+    out[4] = m4 + tx * m5;
+    out[5] = ty * m4 + m5;
     return out;
 }
 
@@ -134,15 +136,16 @@ export function translate(out, m, v) {
  * @return out
  */
 export function rotate(out, m, angle) {
+    const [m0, m1, m2, m3, m4, m5] = m;
     const st = Math.sin(angle);
     const ct = Math.cos(angle);
 
-    out[0] = m[0] * ct + m[1] * st;
-    out[1] = -m[0] * st + m[1] * ct;
-    out[2] = m[2] * ct + m[3] * st;
-    out[3] = -m[2] * st + ct * m[3];
-    out[4] = ct * m[4] + st * m[5];
-    out[5] = ct * m[5] - st * m[4];
+    out[0] = m0 * ct + m1 * st;
+    out[1] = -m0 * st + m1 * ct;
+    out[2] = m2 * ct + m3 * st;
+    out[3] = -m2 * st + ct * m3;
+    out[4] = ct * m4 + st * m5;
+    out[5] = ct * m5 - st * m4;
     return out;
 }
 

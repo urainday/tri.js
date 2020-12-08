@@ -34,14 +34,24 @@ test('clone ', () => {
     expect(out).toEqual(m);
 });
 
-test('invert', () => {
-    const m = [1, 4, 2, 5, 3, 6];
-    const inv = [-5 / 3, 4 / 3, 2 / 3, -1 / 3, 1, -2];
-    const result = invert(out, m);
-    expect(out).toEqual(inv);
-    expect(result).toBe(out);
-    expect(m).toEqual([1, 4, 2, 5, 3, 6]);
-});
+describe('invert', () => {
+    test('invert - 1', () => {
+        const m = [1, 4, 2, 5, 3, 6];
+        const inv = [-5 / 3, 4 / 3, 2 / 3, -1 / 3, 1, -2];
+        const result = invert(out, m);
+        expect(out).toEqual(inv);
+        expect(result).toBe(out);
+        expect(m).toEqual([1, 4, 2, 5, 3, 6]);
+    });
+
+    test('invert - 2', () => {
+        const m = [1, 4, 2, 5, 3, 6];
+        const inv = [-5 / 3, 4 / 3, 2 / 3, -1 / 3, 1, -2];
+        const result = invert(m, m);
+        expect(m).toEqual(inv);
+        expect(result).toBe(m);
+    });
+})
 
 test('invert - not invertible', () => {
     const m = [1, 1, 1, 1, 0, 0];
@@ -58,20 +68,37 @@ test('scale', () => {
     expect(result).toBe(out);
 });
 
-test('skew', () => {
-    const DEGREE_TO_RADIAN = Math.PI / 180;
-    const precision = 0.000001;
-    const v = [45 * DEGREE_TO_RADIAN, 180 * DEGREE_TO_RADIAN];
-    const m = [5, 10, 15, 20, 25, 30];
-    const result = skew(out, m, v);
-    expect(Math.abs(out[0] - 15)).toBeLessThanOrEqual(precision);
-    expect(Math.abs(out[1] - 10)).toBeLessThanOrEqual(precision);
-    expect(Math.abs(out[2] - 35)).toBeLessThanOrEqual(precision);
-    expect(Math.abs(out[3] - 20)).toBeLessThanOrEqual(precision);
-    expect(Math.abs(out[4] - 55)).toBeLessThanOrEqual(precision);
-    expect(Math.abs(out[5] - 30)).toBeLessThanOrEqual(precision);
-    expect(result).toBe(out);
+describe('skew', () => {
+    test('skew - 1', () => {
+        const DEGREE_TO_RADIAN = Math.PI / 180;
+        const precision = 0.000001;
+        const v = [45 * DEGREE_TO_RADIAN, 180 * DEGREE_TO_RADIAN];
+        const m = [5, 10, 15, 20, 25, 30];
+        const result = skew(out, m, v);
+        expect(Math.abs(out[0] - 15)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[1] - 10)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[2] - 35)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[3] - 20)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[4] - 55)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[5] - 30)).toBeLessThanOrEqual(precision);
+        expect(result).toBe(out);
+    });
+
+    test('skew - 2', () => {
+        const DEGREE_TO_RADIAN = Math.PI / 180;
+        const precision = 0.000001;
+        const v = [45 * DEGREE_TO_RADIAN, 180 * DEGREE_TO_RADIAN];
+        const m = [5, 10, 15, 20, 25, 30];
+        const result = skew(m, m, v);
+        expect(Math.abs(m[0] - 15)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(m[1] - 10)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(m[2] - 35)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(m[3] - 20)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(m[4] - 55)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(m[5] - 30)).toBeLessThanOrEqual(precision);
+    });
 });
+
 
 test('translate', () => {
     const v = [40, 60];
@@ -81,20 +108,35 @@ test('translate', () => {
     expect(result).toBe(out);
 });
 
+describe('rotate', () => {
+    test('rotate - 1', () => {
+        const DEGREE_TO_RADIAN = Math.PI / 180;
+        const precision = 0.000001;
+        const angle = 90 * DEGREE_TO_RADIAN;
+        const m = identity();
+        const result = rotate(out, m, angle);
+        expect(Math.abs(out[0])).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[1] - (-1))).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[2] - 1)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[3])).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[4])).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[5])).toBeLessThanOrEqual(precision);
+        expect(result).toBe(out);
+    });
 
-test('rotate', () => {
-    const DEGREE_TO_RADIAN = Math.PI / 180;
-    const precision = 0.000001;
-    const angle = 90 * DEGREE_TO_RADIAN;
-    const m = identity();
-    const result = rotate(out, m, angle);
-    expect(Math.abs(out[0])).toBeLessThanOrEqual(precision);
-    expect(Math.abs(out[1] - (-1))).toBeLessThanOrEqual(precision);
-    expect(Math.abs(out[2] - 1)).toBeLessThanOrEqual(precision);
-    expect(Math.abs(out[3])).toBeLessThanOrEqual(precision);
-    expect(Math.abs(out[4])).toBeLessThanOrEqual(precision);
-    expect(Math.abs(out[5])).toBeLessThanOrEqual(precision);
-    expect(result).toBe(out);
+    test('rotate - 2', () => {
+        const DEGREE_TO_RADIAN = Math.PI / 180;
+        const precision = 0.000001;
+        const angle = 90 * DEGREE_TO_RADIAN;
+        const m = identity();
+        const result = rotate(m, m, angle);
+        expect(Math.abs(m[0])).toBeLessThanOrEqual(precision);
+        expect(Math.abs(m[1] - (-1))).toBeLessThanOrEqual(precision);
+        expect(Math.abs(m[2] - 1)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(m[3])).toBeLessThanOrEqual(precision);
+        expect(Math.abs(m[4])).toBeLessThanOrEqual(precision);
+        expect(Math.abs(m[5])).toBeLessThanOrEqual(precision);
+    });
 });
 
 test('mutiply', () => {

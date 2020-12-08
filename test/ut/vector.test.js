@@ -227,7 +227,7 @@ describe('applyTransform', () => {
         mRotate(m, m, 90 * DEGREE_TO_RADIAN);
         const result = applyTransform(out, v1, m);
         expect(out[0] - 2).toBeLessThanOrEqual(precision);
-        expect(out[1] - 1).toBeLessThanOrEqual(precision);
+        expect(out[1] - (-1)).toBeLessThanOrEqual(precision);
         expect(result).toBe(out);
         expect(v1).toEqual([1, 2]);
     });
