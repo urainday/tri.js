@@ -15,21 +15,23 @@ import {
     scale,
     normalize,
     min,
-    max, applyTransform
+    max,
+    applyTransform,
+    Vec2
 } from '../../src/core/vector';
 import {
     identity,
     scale as mScale,
     rotate as mRotate,
     skew as mSkew,
-    translate as mTranslate
+    translate as mTranslate, Matrix
 } from '../../src/core/matrix';
 
 const precision = 0.000001;
 const DEGREE_TO_RADIAN = Math.PI / 180;
-let out;
-let v1;
-let v2;
+let out: Vec2;
+let v1: Vec2;
+let v2: Vec2;
 
 beforeEach(() => {
     out = create();
@@ -160,6 +162,13 @@ describe('div', () => {
         expect(result).toBe(v2);
         expect(v1).toEqual([1, 2]);
     });
+
+    test('when v2 is 0', () => {
+        const v2: Vec2 = [0, 0];
+        expect(() => {
+            div(v1, v1, v2);
+        }).toThrow();
+    })
 });
 
 describe('scale', function() {
@@ -254,8 +263,8 @@ describe('applyTransform', () => {
 
     test('apply compose transform', () => {
         // trans(40,40) scale(2,2) trans(-40,-40)
-        const m = [2, 0, 0, 2, -40, -40];
-        const v1 = [30, 30];
+        const m: Matrix = [2, 0, 0, 2, -40, -40];
+        const v1: Vec2 = [30, 30];
         const result = applyTransform(out, v1, m);
         expect(out).toEqual([20, 20]);
         expect(result).toBe(out);

@@ -4,22 +4,39 @@
 import {
     identity as mIdentity,
     translate as mTranslate,
-    scale as mScale
+    scale as mScale, Matrix
 } from './matrix'
 
-import {applyTransform as vec2ApplyTransform} from './vector';
+import {applyTransform as vec2ApplyTransform, Vec2} from './vector';
+
+export interface Rect {
+    x: number,
+    y: number,
+    width: number,
+    height: number
+}
 
 class BoundingRect {
+
+    public x: number;
+
+    public y: number;
+
+    public width: number;
+
+    public height: number;
+
     /**
      * Create an boundingRect.
+     *
      * @param rect {Object} the plain rect value.
      */
-    static create(rect) {
+    static create(rect: Rect): BoundingRect {
         const {x, y, width, height} = rect;
         return new BoundingRect(x, y, width, height);
     }
 
-    constructor(x = 0, y = 0, width = 0, height = 0) {
+    constructor(x: number = 0, y: number = 0, width: number = 0, height: number = 0) {
         if (width < 0) {
             x += width;
             width = -width;
@@ -40,15 +57,15 @@ class BoundingRect {
      * Apply transform matrix to this boundingRect
      * @param {Matrix} m transform matrix
      */
-    applyTransform(m) {
+    applyTransform(m: Matrix): void {
         if (m == null) {
             return;
         }
         const {x, y, width, height} = this;
-        const lt = [x, y];
-        const rt = [x + width, y];
-        const rb = [x + width, y + height];
-        const lb = [x, y + height];
+        const lt: Vec2 = [x, y];
+        const rt: Vec2 = [x + width, y];
+        const rb: Vec2 = [x + width, y + height];
+        const lb: Vec2 = [x, y + height];
 
         vec2ApplyTransform(lt, lt, m);
         vec2ApplyTransform(rt, rt, m);
@@ -67,9 +84,10 @@ class BoundingRect {
 
     /**
      * Calculate matrix of transforming from self to target rect.
+     *
      * @param {BoundingRect} target target BoundingRect.
      */
-    calculateTransform(target) {
+    calculateTransform(target: BoundingRect): Matrix {
         const {x, y, width, height} = this;
         const sx = target.width / width;
         const sy = target.height / height;
@@ -84,9 +102,10 @@ class BoundingRect {
 
     /**
      * Set this boundingRect to union of self and other boundingRect.
+     *
      * @param {BoundingRect} other other boundingRect.
      */
-    union(other) {
+    union(other: BoundingRect): void {
         const x = Math.min(other.x, this.x);
         const y = Math.min(other.y, this.y);
         this.x = x;
@@ -97,9 +116,10 @@ class BoundingRect {
 
     /**
      * Returns true if this boundingRect intersects with other boundingRect.
-     * @param {BoundingRect} other other boundingRect.
+     *
+     * @param {BoundingRect | Rect} other other boundingRect.
      */
-    intersect(other) {
+    intersect(other: BoundingRect | Rect): boolean {
         if (other == null) {
             return false;
         }
@@ -119,11 +139,12 @@ class BoundingRect {
 
     /**
      * Returns true if the boundingRect contains the x and y.
+     *
      * @param x x coordinate
      * @param y y coordinate
      * @return {boolean} Returns true if the boundingRect contains the x and y.
      */
-    contain(x, y) {
+    contain(x: number, y: number): boolean {
         return x >= this.x
             && x <= (this.x + this.width)
             && y >= this.y
@@ -132,18 +153,20 @@ class BoundingRect {
 
     /**
      * Create a new boundingRect initialized with values from existing boundingRect.
+     *
      * @return {BoundingRect} a new boundingRect
      */
-    clone() {
+    clone(): BoundingRect {
         const {x, y, width, height} = this;
         return new BoundingRect(x, y, width, height);
     }
 
     /**
-     * Copy the values from one boundingRect to another
+     * Copy the values from one boundingRect to another.
+     *
      * @param {BoundingRect} a new boundingRect
      */
-    copy(other) {
+    copy(other: BoundingRect): void {
         this.x = other.x;
         this.y = other.y;
         this.width = other.width;
@@ -151,10 +174,11 @@ class BoundingRect {
     }
 
     /**
-     * Return the plain rect value of bounding rect.
+     * Return the plain rect value of this boundingRect.
+     *
      * @return {Object}
      */
-    plain() {
+    plain(): Rect {
         const {x, y, width, height} = this;
         return {x, y, width, height};
     }

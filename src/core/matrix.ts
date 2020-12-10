@@ -2,30 +2,28 @@
  * @file Javascript isomorphic 2D affine transformations write in ES6 syntax.
  */
 
+import {Vec2} from "./vector";
+
+export type Matrix = [number, number, number, number, number, number];
+
 /**
  * Creates a new identity matrix
  *
  * @return {Matrix} out the receiving matrix
  */
-export function identity() {
-    const out = [];
-    out[0] = 1;
-    out[1] = 0;
-    out[2] = 0;
-    out[3] = 1;
-    out[4] = 0;
-    out[5] = 0;
+export function identity(): Matrix {
+    const out: Matrix = [1, 0, 0, 1, 0, 0];
     return out;
 }
 
 /**
  * Copy the values from m to out
  *
- * @param {matrix} out the receiving matrix
- * @param {matrix} m the source matrix
- * @return {matrix} out
+ * @param {Matrix} out the receiving matrix
+ * @param {Matrix} m the source matrix
+ * @return {Matrix} out
  */
-export function copy(out, m) {
+export function copy(out: Matrix, m: Matrix): Matrix {
     out[0] = m[0];
     out[1] = m[1];
     out[2] = m[2];
@@ -36,12 +34,12 @@ export function copy(out, m) {
 }
 
 /**
- * Create a new matrix initialized with values from an existing matrix
+ * Create a new matrix initialized with values from the source matrix
  *
- * @param {matrix} m a matrix to clone
- * @return {matrix} a new matrix
+ * @param {Matrix} m the source matrix to clone
+ * @return {Matrix} a new matrix
  */
-export function clone(m) {
+export function clone(m: Matrix): Matrix {
     const out = identity();
     copy(out, m);
     return out;
@@ -50,15 +48,16 @@ export function clone(m) {
 /**
  * Invert a matrix
  *
- * @param {matrix} out the receiving matrix
- * @param {matrix} m the source matrix
- * @return out, return null if m is not invertible
+ * @param {Matrix} out the receiving matrix
+ * @param {Matrix} m the source matrix
+ * @return {Matrix} out
+ * @throw will throw Error if m is not invertible
  */
-export function invert(out, m) {
+export function invert(out: Matrix, m: Matrix): Matrix {
     const [m0, m1, m2, m3, m4, m5] = m;
     const det = m0 * m3 - m1 * m2;
-    if (!det) {
-        return null;
+    if (det === 0) {
+        throw new Error('m is not invertible');
     }
 
     out[0] =  m3 / det;
@@ -74,12 +73,12 @@ export function invert(out, m) {
 /**
  * Scale the matrix by the given vector
  *
- * @param {matrix} out the receiving matrix
- * @param {matrix} m the matrix to scale
- * @param {vec2} v vector to scale the matrix by
- * @return out
+ * @param {Matrix} out the receiving matrix
+ * @param {Matrix} m the matrix to scale
+ * @param {Vec2} v vector to scale the matrix by
+ * @return {Matrix} out
  */
-export function scale(out, m, v) {
+export function scale(out: Matrix, m: Matrix, v: Vec2): Matrix {
     out[0] = m[0] * v[0];
     out[1] = m[1] * v[1];
     out[2] = m[2] * v[0];
@@ -92,11 +91,11 @@ export function scale(out, m, v) {
 /**
  * Skew the matrix by the given vector
  *
- * @param {matrix} out the receiving matrix
- * @param {matrix} m the matrix to skew
- * @param {vec2} v vector to skew the matrix by
+ * @param {Matrix} out the receiving matrix
+ * @param {Matrix} m the matrix to skew
+ * @param {Vec2} v vector to skew the matrix by
  */
-export function skew(out, m, v) {
+export function skew(out: Matrix, m: Matrix, v: Vec2): Matrix {
     const [m0, m1, m2, m3, m4, m5] = m;
     const tx = Math.tan(v[0]);
     const ty = Math.tan(v[1]);
@@ -112,12 +111,12 @@ export function skew(out, m, v) {
 /**
  * Translate a matrix by the given vector
  *
- * @param {matrix} out the receiving matrix
- * @param {matrix} m the matrix to translate
- * @param {vec2} v vector to translate the matrix by
- * @return out
+ * @param {Matrix} out the receiving matrix
+ * @param {Matrix} m the matrix to translate
+ * @param {Vec2} v vector to translate the matrix by
+ * @return {Matrix} out
  */
-export function translate(out, m, v) {
+export function translate(out: Matrix, m: Matrix, v: Vec2): Matrix {
     out[0] = m[0];
     out[1] = m[1];
     out[2] = m[2];
@@ -130,12 +129,12 @@ export function translate(out, m, v) {
 /**
  * Rotate a matrix by the given angle
  *
- * @param {matrix} out the receiving matrix
- * @param {matrix} m the matrix to rotate
+ * @param {Matrix} out the receiving matrix
+ * @param {Matrix} m the matrix to rotate
  * @param {number} angle the RAD angle to rotate the matrix by
- * @return out
+ * @return {Matrix} out
  */
-export function rotate(out, m, angle) {
+export function rotate(out: Matrix, m: Matrix, angle: number): Matrix {
     const [m0, m1, m2, m3, m4, m5] = m;
     const st = Math.sin(angle);
     const ct = Math.cos(angle);
@@ -152,14 +151,12 @@ export function rotate(out, m, angle) {
 /**
  * Multiply two matrices
  *
- * @param {matrix} out the receiving matrix
- * @param {matrix} m1 the first operand
- * @param {matrix} m2 the second operand
- * @return out
+ * @param {Matrix} out the receiving matrix
+ * @param {Matrix} m1 the first operand
+ * @param {Matrix} m2 the second operand
+ * @return {Matrix} out
  */
-export function multiply(out, m1, m2) {
-    // Consider matrix.multiply(m, m2, m) where out is the same as m2
-    // Use temp variable to escape error
+export function multiply(out: Matrix, m1: Matrix, m2: Matrix): Matrix {
     const out0 = m1[0] * m2[0] + m1[2] * m2[1];
     const out1 = m1[1] * m2[0] + m1[3] * m2[1];
     const out2 = m1[0] * m2[2] + m1[2] * m2[3];

@@ -1,25 +1,24 @@
 /**
- * @file LRU.test.js
+ * @file LRU.spec.ts
  */
 import LRU from '../../src/core/LRU';
 
-
 describe('constructor', () => {
     test('set limit to 4', () => {
-        const c = new LRU(4);
-        expect(c._limit).toBe(4);
+        const c = new LRU<number>(4);
+        expect(c).not.toBe(null);
     });
 
     test('without limit parameter', () => {
-        const c = new LRU();
-        expect(c._limit).toBe(10);
+        const c = new LRU<number>();
+        expect(c).not.toBe(null);
     });
 });
 
 describe('put && get', () => {
-    let c;
+    let c: LRU<number>;
     beforeEach(() => {
-        c = new LRU(3);
+        c = new LRU<number>(3);
     });
 
     test('put - does not contain the key', () => {
@@ -73,7 +72,7 @@ describe('put && get', () => {
 });
 
 test('has', () => {
-    const c = new LRU(3);
+    const c = new LRU<number>(3);
     c.put('k1', 1);
     c.put('k2', null);
     c.put('k3', 3);
@@ -86,7 +85,7 @@ test('has', () => {
 });
 
 test('clear', () => {
-    const c = new LRU(3);
+    const c = new LRU<number>(3);
     c.put('k1', 1);
     c.put('k2', 2);
     c.clear();

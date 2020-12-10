@@ -1,7 +1,7 @@
 /**
  * @file BoundingRect.test.js
  */
-import BoundingRect from '../../src/core/BoundingRect';
+import BoundingRect, {Rect} from '../../src/core/BoundingRect';
 import {
     translate as mTranslate,
     scale as mScale,
@@ -9,7 +9,7 @@ import {
     identity as mIdentity
 } from '../../src/core/matrix'
 
-let br;
+let br: BoundingRect;
 beforeEach(() => {
     br = BoundingRect.create({x: 1, y: 2, width: 3, height: 4});
 });
@@ -141,7 +141,7 @@ describe('intersect', () => {
     });
 
     test('intersect - 5', () => {
-        const rect = {x: 10, y: 10, width: 4, height: 5};
+        const rect: Rect = {x: 10, y: 10, width: 4, height: 5};
         const result = br.intersect(rect);
         expect(result).toBeFalsy();
     });

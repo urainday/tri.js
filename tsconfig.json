@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "target": "ES3",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "module": "CommonJS",
+        "strict": true,
+        "strictNullChecks": false,
+        "declaration": true,
+        "rootDir": "src",
+        "outDir": "dist",
+        "sourceMap": false,
+        "importHelpers": true,
+        "pretty": true
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules", "**/*.spec.ts"]
+}
+
