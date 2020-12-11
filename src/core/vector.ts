@@ -69,6 +69,23 @@ export function squaredDistance(v1: Vec2, v2: Vec2): number {
 }
 
 /**
+ * Calculates the linear interpolation of v1 and v2
+ *
+ * @param {Vec2} out the receiving vector
+ * @param {Vec2} v1 the first operand
+ * @param {Vec2} v2 the second operand
+ * @param {number} t interval range from 0 to 1
+ * @return {Vec2} out
+ */
+export function linearInterpolation(out: Vec2, v1: Vec2, v2: Vec2, t: number): Vec2 {
+    const x = (1 - t) * v1[0] + t * v2[0];
+    const y = (1 - t) * v1[1] + t * v2[1];
+    out[0] = x;
+    out[1] = y;
+    return out;
+}
+
+/**
  * Adds two Vec2's
  *
  * @param {Vec2} out the receiving vector
