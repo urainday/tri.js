@@ -17,7 +17,8 @@ import {
     min,
     max,
     applyTransform,
-    Vec2
+    Vec2,
+    linearInterpolation
 } from '../../src/core/vector';
 import {
     identity,
@@ -71,6 +72,58 @@ test('distance', () => {
 test('squaredDistance', () => {
     const result = squaredDistance(v1, v2);
     expect(result).toBe(8);
+});
+
+describe('linearInterpolation', () => {
+    test('t is 0', () => {
+        const result = linearInterpolation(out, v1, v2, 0);
+        expect(out).toEqual(v1);
+        expect(result).toBe(out);
+        expect(v1).toEqual([1, 2]);
+        expect(v2).toEqual([3, 4]);
+    });
+
+    test('t is 1', () => {
+        const result = linearInterpolation(out, v1, v2, 1);
+        expect(out).toEqual(v2);
+        expect(result).toBe(out);
+        expect(v1).toEqual([1, 2]);
+        expect(v2).toEqual([3, 4]);
+    });
+
+    test('t is 0.4', () => {
+        const result = linearInterpolation(out, v1, v2, 0.4);
+        expect(Math.abs(out[0] - 1.8)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[1] - 2.8)).toBeLessThanOrEqual(precision);
+        expect(result).toBe(out);
+        expect(v1).toEqual([1, 2]);
+        expect(v2).toEqual([3, 4]);
+    });
+
+    test('t is out of range', () => {
+        expect(() => {
+            linearInterpolation(out, v1, v2, -1);
+        }).toThrow();
+        expect(() => {
+            linearInterpolation(out, v1, v2, 2);
+        }).toThrow();
+    });
+
+    test('out is v1', () => {
+        const result = linearInterpolation(v1, v1, v2, 0.4);
+        expect(Math.abs(v1[0] - 1.8)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(v1[1] - 2.8)).toBeLessThanOrEqual(precision);
+        expect(result).toBe(v1);
+        expect(v2).toEqual([3, 4]);
+    });
+
+    test('out is v2', () => {
+        const result = linearInterpolation(v2, v1, v2, 0.4);
+        expect(Math.abs(v2[0] - 1.8)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(v2[1] - 2.8)).toBeLessThanOrEqual(precision);
+        expect(result).toBe(v2);
+        expect(v1).toEqual([1, 2]);
+    });
 });
 
 describe('add', () => {

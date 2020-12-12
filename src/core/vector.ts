@@ -76,8 +76,13 @@ export function squaredDistance(v1: Vec2, v2: Vec2): number {
  * @param {Vec2} v2 the second operand
  * @param {number} t interval range from 0 to 1
  * @return {Vec2} out
+ * @throws will throw Error if t is not range from 0 to 1.
  */
 export function linearInterpolation(out: Vec2, v1: Vec2, v2: Vec2, t: number): Vec2 {
+    if (t < 0 || t > 1) {
+        throw new Error(`interval is ${t}, it should range from 0 to 1.`);
+    }
+
     const x = (1 - t) * v1[0] + t * v2[0];
     const y = (1 - t) * v1[1] + t * v2[1];
     out[0] = x;

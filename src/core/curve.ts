@@ -20,6 +20,240 @@ function isNotAroundZero(val: number): boolean {
     return val > EPSILON || val < -EPSILON;
 }
 
+// quadratic
+
+/**
+ * The mathematics of quadratic Bézier curve
+ * const v01 = (1 - t) * v0 + t * v1;
+ * const v12 = (1 - t) * v1 + t * v2;
+ * return (1 - t) * v01 + t * v12;
+ *
+ * @param {Vec2} v0 the first control point
+ * @param {Vec2} v1 the second control point
+ * @param {Vec2} v2 the third control point
+ * @param {number} t interval range from 0 to 1
+ * @return {Vec2} quadratic Bézier curve value
+ * @throws will throw Error if t is not range from 0 to 1.
+ */
+export function quadraticAt(
+    v0: Vec2,
+    v1: Vec2,
+    v2: Vec2,
+    t: number
+): Vec2 {
+    if (t < 0 || t > 1) {
+        throw new Error(`interval is ${t}, it should range from 0 to 1.`);
+    }
+
+    const v01 = vLinearInterpolation(vCreate(), v0, v1, t);
+    const v12 = vLinearInterpolation(vCreate(), v1, v2, t);
+    const v012 = vLinearInterpolation(vCreate(), v01, v12, t);
+    return v012;
+}
+
+/**
+ * The derivative at t of the quadratic Bézier curve
+ *
+ * @param {Vec2} v0 the first control point
+ * @param {Vec2} v1 the second control point
+ * @param {Vec2} v2 the third control point
+ * @param {number} t interval range from 0 to 1
+ * @return {Vec2} quadratic Bézier curve derivative value
+ * @throws will throw Error if t is not range from 0 to 1.
+ */
+export function quadraticDerivativeAt(
+    v0: Vec2,
+    v1: Vec2,
+    v2: Vec2,
+    t: number
+): Vec2 {
+    if (t < 0 || t > 1) {
+        throw new Error(`interval is ${t}, it should range from 0 to 1.`);
+    }
+
+    const [x0, y0] = v0;
+    const [x1, y1] = v1;
+    const [x2, y2] = v2;
+    const out = vCreate();
+    out[0] = 2 * ((1 - t) * (x1 - x0) + t * (x2 - x1));
+    out[1] = 2 * ((1 - t) * (y1 - y0) + t * (y2 - y1));
+    return out;
+}
+
+/**
+ * Find the extremum of quadratic Bézier curve
+ *
+ * We find the extremum by solving the equation B'(t) = 0
+ * @param {number} p0 the first control point
+ * @param {number} p1 the second control point
+ * @param {number} p2 the third control point
+ * @return {number} extremum t of quadratic Bézier curve
+ */
+export function quadraticExtremum(
+    p0: number,
+    p1: number,
+    p2: number
+): number {
+    // B'(t) = 2 * ((1 - t) * (p1 - p0) + t * (p2 - p1))
+    const divider = p0 - 2 * p1 + p2;
+    if (divider === 0) {
+        return 0.5;
+    } else {
+        return (p0 - p1) / divider;
+    }
+}
+
+/**
+ * Find the root of quadratic Bézier curve
+ *
+ * @param {number} p0 the first control point
+ * @param {number} p1 the second control point
+ * @param {number} p2 the third control point
+ * @param {number} val target value
+ * @param {Array<number>} roots results
+ * @return {number} the number of roots
+ */
+export function quadraticRootAt(
+    p0: number,
+    p1: number,
+    p2: number,
+    val: number,
+    roots: Array<number>
+): number {
+    const a = p0 - 2 * p1 + p2;
+    const b = 2 * (p1 - p0);
+    const c = p0 - val;
+
+    let n = 0;
+    if (isAroundZero(a)) {
+        if (isNotAroundZero(b)) {
+            const t1 = -c / b;
+            if (t1 >= 0 && t1 <= 1) {
+                roots[n++] = t1;
+            }
+        }
+    } else {
+        const disc = b * b - 4 * a * c;
+        if (isAroundZero(disc)) {
+            const t1 = -b / (2 * a);
+            if (t1 >= 0 && t1 <= 1) {
+                roots[n++] = t1;
+            }
+        } else if (disc > 0) {
+            const discSqrt = Math.sqrt(disc);
+            const t1 = (-b + discSqrt) / (2 * a);
+            if (t1 >= 0 && t1 <= 1) {
+                roots[n++] = t1;
+            }
+            const t2 = (-b - discSqrt) / (2 * a);
+            if (t2 >= 0 && t2 <= 1) {
+                roots[n++] = t2;
+            }
+        }
+    }
+    return n;
+}
+
+/**
+ * Subdivide quadratic Bézier curve
+ *
+ * @param {number} v0 the first control point
+ * @param {number} v1 the second control point
+ * @param {number} v2 the third control point
+ * @param {number} t interval range from 0 to 1
+ * @param {Array<Vec2>} out results
+ * @throws will throw Error if t is not range from 0 to 1.
+ */
+export function quadraticSubdivide(
+    v0: Vec2,
+    v1: Vec2,
+    v2: Vec2,
+    t: number,
+    out: Array<Vec2>
+): void {
+    if (t < 0 || t > 1) {
+        throw new Error(`interval is ${t}, it should range from 0 to 1.`);
+    }
+
+    const v01 = vLinearInterpolation(vCreate(), v0, v1, t);
+    const v12 = vLinearInterpolation(vCreate(), v1, v2, t);
+    const v012 = vLinearInterpolation(vCreate(), v01, v12, t);
+
+    // Seg0
+    out[0] = v0;
+    out[1] = v01;
+    out[2] = v012;
+
+    // Seg1
+    out[3] = v012;
+    out[4] = v12;
+    out[5] = v2;
+}
+
+/**
+ * The approximate projection of a point to rational cubic Bézier curve.
+ * http://pomax.github.io/bezierinfo/#projections
+ *
+ * @param {Vec2} v0 the first control point
+ * @param {Vec2} v1 the second control point
+ * @param {Vec2} v2 the third control point
+ * @param {Vec2} v point
+ * @param {Vec2} out approximate projection point
+ * @return {number} distance
+ */
+export function quadraticProjectAt(
+    v0: Vec2,
+    v1: Vec2,
+    v2: Vec2,
+    v: Vec2,
+    out: Vec2
+): number {
+    let pt: number;
+    let pd = Infinity;
+
+    for (let t = 0; t <= 1; t += 0.05) {
+        const vt = quadraticAt(v0, v1, v2, t);
+        const d = vDistance(v, vt);
+        if (d < pd) {
+            pd = d;
+            pt = t;
+        }
+    }
+
+    let interval = 0.005;
+    pd = Infinity;
+    // At most 32 iteration
+    for (let i = 0; i < 32; i++) {
+        if (interval < EPSILON_NUMERIC) {
+            break;
+        }
+        const prevT = pt - interval;
+        const prevV = quadraticAt(v0, v1, v2, prevT);
+        const prevD = vDistance(v, prevV);
+
+        if (prevT >= 0 && prevD < pd) {
+            pt = prevT;
+            pd = prevD;
+        } else {
+            const nextT = pt + interval;
+            const nextV = quadraticAt(v0, v1, v2, nextT);
+            const nextD = vDistance(v, nextV);
+            if (nextT <= 1 && nextD < pd) {
+                pt = nextT;
+                pd = nextD;
+            } else {
+                interval *= 0.5;
+            }
+        }
+    }
+
+    const pv = quadraticAt(v0, v1, v2, pt);
+    vCopy(out, pv);
+
+    return Math.sqrt(pd);
+}
+
+
 // cubic
 
 /**
@@ -30,6 +264,7 @@ function isNotAroundZero(val: number): boolean {
  * @param {Vec2} v3 the fourth control point
  * @param {number} t interval range from 0 to 1
  * @return {Vec2} cubic Bézier curve value
+ * @throws will throw Error if t is not range from 0 to 1.
  */
 export function cubicAt(
     v0: Vec2,
@@ -38,6 +273,10 @@ export function cubicAt(
     v3: Vec2,
     t: number
 ): Vec2 {
+    if (t < 0 || t > 1) {
+        throw new Error(`interval is ${t}, it should range from 0 to 1.`);
+    }
+
     const v01 = vLinearInterpolation(vCreate(), v0, v1, t);
     const v12 = vLinearInterpolation(vCreate(), v1, v2, t);
     const v23 = vLinearInterpolation(vCreate(), v2, v3, t);
@@ -56,6 +295,7 @@ export function cubicAt(
  * @param {Vec2} v3 the fourth control point
  * @param {number} t interval range from 0 to 1
  * @return {Vec2} cubic Bézier curve value
+ * @throws will throw Error if t is not range from 0 to 1.
  */
 export function cubicDerivativeAt(
     v0: Vec2,
@@ -64,6 +304,10 @@ export function cubicDerivativeAt(
     v3: Vec2,
     t: number
 ) {
+    if (t < 0 || t > 1) {
+        throw new Error(`interval is ${t}, it should range from 0 to 1.`);
+    }
+
     const [x0, y0] = v0;
     const [x1, y1] = v1;
     const [x2, y2] = v2;
@@ -230,6 +474,7 @@ export function cubicRootAt(
  * @param {number} v3 the third control point
  * @param {number} t interval range from 0 to 1
  * @param {Array<Vec2>} out results
+ * @throws will throw Error if t is not range from 0 to 1.
  */
 export function cubicSubdivide(
     v0: Vec2,
@@ -239,6 +484,10 @@ export function cubicSubdivide(
     t: number,
     out: Array<Vec2>
 ): void {
+    if (t < 0 || t > 1) {
+        throw new Error(`interval is ${t}, it should range from 0 to 1.`);
+    }
+
     const v01 = vLinearInterpolation(vCreate(), v0, v1, t);
     const v12 = vLinearInterpolation(vCreate(), v1, v2, t);
     const v23 = vLinearInterpolation(vCreate(), v2, v3, t);
@@ -320,224 +569,6 @@ export function cubicProjectAt(
     }
 
     const pv = cubicAt(v0, v1, v2, v3, pt);
-    vCopy(out, pv);
-
-    return Math.sqrt(pd);
-}
-
-// quadratic
-
-/**
- * The mathematics of quadratic Bézier curve
- * const v01 = (1 - t) * v0 + t * v1;
- * const v12 = (1 - t) * v1 + t * v2;
- * return (1 - t) * v01 + t * v12;
- *
- * @param {Vec2} v0 the first control point
- * @param {Vec2} v1 the second control point
- * @param {Vec2} v2 the third control point
- * @param {number} t interval range from 0 to 1
- * @return {Vec2} quadratic Bézier curve value
- */
-export function quadraticAt(
-    v0: Vec2,
-    v1: Vec2,
-    v2: Vec2,
-    t: number
-): Vec2 {
-    const v01 = vLinearInterpolation(vCreate(), v0, v1, t);
-    const v12 = vLinearInterpolation(vCreate(), v1, v2, t);
-    const v012 = vLinearInterpolation(vCreate(), v01, v12, t);
-    return v012;
-}
-
-/**
- * The derivative at t of the quadratic Bézier curve
- *
- * @param {Vec2} v0 the first control point
- * @param {Vec2} v1 the second control point
- * @param {Vec2} v2 the third control point
- * @param {number} t interval range from 0 to 1
- * @return {Vec2} quadratic Bézier curve derivative value
- */
-export function quadraticDerivativeAt(
-    v0: Vec2,
-    v1: Vec2,
-    v2: Vec2,
-    t: number
-): Vec2 {
-    const [x0, y0] = v0;
-    const [x1, y1] = v1;
-    const [x2, y2] = v2;
-    const out = vCreate();
-    out[0] = 2 * ((1 - t) * (x1 - x0) + t * (x2 - x1));
-    out[1] = 2 * ((1 - t) * (y1 - y0) + t * (y2 - y1));
-    return out;
-}
-
-/**
- * Find the extremum of quadratic Bézier curve
- *
- * We find the extremum by solving the equation B'(t) = 0
- * @param {number} p0 the first control point
- * @param {number} p1 the second control point
- * @param {number} p2 the third control point
- * @return {number} extremum t of quadratic Bézier curve
- */
-export function quadraticExtremum(
-    p0: number,
-    p1: number,
-    p2: number
-): number {
-    // B'(t) = 2 * ((1 - t) * (p1 - p0) + t * (p2 - p1))
-    const divider = p0 - 2 * p1 + p2;
-    if (divider === 0) {
-        return 0.5;
-    } else {
-        return (p0 - p1) / divider;
-    }
-}
-
-/**
- * Find the root of quadratic Bézier curve
- *
- * @param {number} p0 the first control point
- * @param {number} p1 the second control point
- * @param {number} p2 the third control point
- * @param {number} val target value
- * @param {Array<number>} roots results
- * @return {number} the number of roots
- */
-export function quadraticRootAt(
-    p0: number,
-    p1: number,
-    p2: number,
-    val: number,
-    roots: Array<number>
-): number {
-    const a = p0 - 2 * p1 + p2;
-    const b = 2 * (p1 - p0);
-    const c = p0 - val;
-
-    let n = 0;
-    if (isAroundZero(a)) {
-        if (isNotAroundZero(b)) {
-            const t1 = -c / b;
-            if (t1 >= 0 && t1 <= 1) {
-                roots[n++] = t1;
-            }
-        }
-    } else {
-        const disc = b * b - 4 * a * c;
-        if (isAroundZero(disc)) {
-            const t1 = -b / (2 * a);
-            if (t1 >= 0 && t1 <= 1) {
-                roots[n++] = t1;
-            }
-        } else if (disc > 0) {
-            const discSqrt = Math.sqrt(disc);
-            const t1 = (-b + discSqrt) / (2 * a);
-            if (t1 >= 0 && t1 <= 1) {
-                roots[n++] = t1;
-            }
-            const t2 = (-b - discSqrt) / (2 * a);
-            if (t2 >= 0 && t2 <= 1) {
-                roots[n++] = t2;
-            }
-        }
-    }
-    return n;
-}
-
-/**
- * Subdivide quadratic Bézier curve
- *
- * @param {number} v0 the first control point
- * @param {number} v1 the second control point
- * @param {number} v2 the third control point
- * @param {number} t interval range from 0 to 1
- * @param {Array<Vec2>} out results
- */
-export function quadraticSubdivide(
-    v0: Vec2,
-    v1: Vec2,
-    v2: Vec2,
-    t: number,
-    out: Array<Vec2>
-): void {
-    const v01 = vLinearInterpolation(vCreate(), v0, v1, t);
-    const v12 = vLinearInterpolation(vCreate(), v1, v2, t);
-    const v012 = vLinearInterpolation(vCreate(), v01, v12, t);
-
-    // Seg0
-    out[0] = v0;
-    out[1] = v01;
-    out[2] = v012;
-
-    // Seg1
-    out[3] = v012;
-    out[4] = v12;
-    out[5] = v2;
-}
-
-/**
- * The approximate projection of a point to rational cubic Bézier curve.
- * http://pomax.github.io/bezierinfo/#projections
- *
- * @param {Vec2} v0 the first control point
- * @param {Vec2} v1 the second control point
- * @param {Vec2} v2 the third control point
- * @param {Vec2} v point
- * @param {Vec2} out approximate projection point
- * @return {number} distance
- */
-export function quadraticProjectAt(
-    v0: Vec2,
-    v1: Vec2,
-    v2: Vec2,
-    v: Vec2,
-    out: Vec2
-): number {
-    let pt: number;
-    let pd = Infinity;
-
-    for (let t = 0; t <= 1; t += 0.05) {
-        const vt = quadraticAt(v0, v1, v2, t);
-        const d = vDistance(v, vt);
-        if (d < pd) {
-            pd = d;
-            pt = t;
-        }
-    }
-
-    let interval = 0.005;
-    pd = Infinity;
-    // At most 32 iteration
-    for (let i = 0; i < 32; i++) {
-        if (interval < EPSILON_NUMERIC) {
-            break;
-        }
-        const prevT = pt - interval;
-        const prevV = quadraticAt(v0, v1, v2, prevT);
-        const prevD = vDistance(v, prevV);
-
-        if (prevT >= 0 && prevD < pd) {
-            pt = prevT;
-            pd = prevD;
-        } else {
-            const nextT = pt + interval;
-            const nextV = quadraticAt(v0, v1, v2, nextT);
-            const nextD = vDistance(v, nextV);
-            if (nextT <= 1 && nextD < pd) {
-                pt = nextT;
-                pd = nextD;
-            } else {
-                interval *= 0.5;
-            }
-        }
-    }
-
-    const pv = quadraticAt(v0, v1, v2, pt);
     vCopy(out, pv);
 
     return Math.sqrt(pd);
