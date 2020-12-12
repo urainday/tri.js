@@ -2,14 +2,14 @@
  * @file curve.spec.ts
  */
 import {
-    cubicAt, cubicDerivativeAt, cubicExtrema, cubicRootAt, cubicSubdivide,
+    cubicAt, cubicDerivativeAt, cubicExtrema, cubicProjectAt, cubicRootAt, cubicSubdivide,
     quadraticAt,
     quadraticDerivativeAt,
-    quadraticExtremum,
+    quadraticExtremum, quadraticProjectAt,
     quadraticRootAt,
     quadraticSubdivide
-} from "../../src/core/curve";
-import {Vec2} from "../../src/core/vector";
+} from '../../src/core/curve';
+import {create as vCreate, Vec2} from '../../src/core/vector';
 
 // v0 = [1, 5]
 // v1 = [3, 1]
@@ -147,7 +147,6 @@ describe('quadratic root at', () => {
 //      = [2tt + 4t + 1, 11tt -8t + 5]
 test('quadratic sub divide', () => {
     const precision = 0.000001;
-
     const t = 0.4;
     const v0: Vec2 = [1, 5];
     const v1: Vec2 = [3, 1];
@@ -170,6 +169,68 @@ test('quadratic sub divide', () => {
     expect(Math.abs(out[4][0] - v12[0])).toBeLessThanOrEqual(precision);
     expect(Math.abs(out[4][1] - v12[1])).toBeLessThanOrEqual(precision);
     expect(out[5]).toEqual(v2);
+});
+
+describe('quadratic project at', () => {
+    // v0 = [0, 0]
+    // v1 = [4, 6]
+    // v2 = [8, 0]
+    // v = [4, 9]
+    // t = 0.5
+    // squareD = 6
+    test('case 1', () => {
+        const precision = 0.01;
+        const v0: Vec2 = [0, 0];
+        const v1: Vec2 = [4, 6];
+        const v2: Vec2 = [8, 0];
+        const v: Vec2 = [4, 9];
+        const pv = quadraticAt(v0, v1, v2, 0.5);
+        const out: Vec2 = vCreate();
+        const result = quadraticProjectAt(v0, v1, v2, v, out);
+        expect(Math.abs(result - Math.sqrt(36))).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[0] - pv[0])).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[1] - pv[1])).toBeLessThanOrEqual(precision);
+    });
+
+    // v0 = [0, 0]
+    // v1 = [4, 6]
+    // v2 = [8, 0]
+    // v = [9, 0.5]
+    // t = 1
+    // squareD = 1.25
+    test('case 2', () => {
+        const precision = 0.01;
+        const v0: Vec2 = [0, 0];
+        const v1: Vec2 = [4, 6];
+        const v2: Vec2 = [8, 0];
+        const v: Vec2 = [9, 0.5];
+        const pv = quadraticAt(v0, v1, v2, 1);
+        const out: Vec2 = vCreate();
+        const result = quadraticProjectAt(v0, v1, v2, v, out);
+        expect(Math.abs(result - Math.sqrt(1.25))).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[0] - pv[0])).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[1] - pv[1])).toBeLessThanOrEqual(precision);
+    });
+
+    // v0 = [0, 0]
+    // v1 = [4, 6]
+    // v2 = [8, 0]
+    // v = [-2, 1]
+    // t = 0
+    // squareD = 5
+    test('case 3', () => {
+        const precision = 0.01;
+        const v0: Vec2 = [0, 0];
+        const v1: Vec2 = [4, 6];
+        const v2: Vec2 = [8, 0];
+        const v: Vec2 = [-2, 1];
+        const pv = quadraticAt(v0, v1, v2, 0);
+        const out: Vec2 = vCreate();
+        const result = quadraticProjectAt(v0, v1, v2, v, out);
+        expect(Math.abs(result - Math.sqrt(5))).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[0] - pv[0])).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[1] - pv[1])).toBeLessThanOrEqual(precision);
+    });
 });
 
 // v0 = [1, 1]
@@ -342,4 +403,25 @@ test('cubic sub divide', () => {
     expect(out[5]).toEqual(v123);
     expect(out[6]).toEqual(v23);
     expect(out[7]).toEqual(v3);
+});
+
+describe('cubic project at', () => {
+    // v0 = [0, 0]
+    // v1 = [4, 6]
+    // v2 = [8, 0]
+    // v3 = [4, 9]
+    // v = [1, 1]
+    test('case 1', () => {
+        const precision = 0.01;
+        const v0: Vec2 = [0, 0];
+        const v1: Vec2 = [4, 6];
+        const v2: Vec2 = [8, 0];
+        const v3: Vec2 = [4, 9];
+        const v: Vec2 = [1, 1];
+        const out: Vec2 = vCreate();
+        const result = cubicProjectAt(v0, v1, v2, v3, v, out);
+        expect(Math.abs(result - 0.428046)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[0] - 0.86324)).toBeLessThanOrEqual(precision);
+        expect(Math.abs(out[1] - 1.121934)).toBeLessThanOrEqual(precision);
+    });
 });

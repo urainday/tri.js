@@ -9,7 +9,7 @@ import {
     invert,
     scale, translate, skew, rotate, multiply, Matrix
 } from '../../src/core/matrix';
-import {Vec2} from "../../src/core/vector";
+import {Vec2} from '../../src/core/vector';
 
 let out: Matrix;
 beforeEach(() => {

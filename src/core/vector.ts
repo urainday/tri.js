@@ -3,6 +3,7 @@
  */
 
 import {Matrix} from './matrix';
+import {isInRange} from './curve';
 
 export type Vec2 = [number, number];
 
@@ -79,7 +80,7 @@ export function squaredDistance(v1: Vec2, v2: Vec2): number {
  * @throws will throw Error if t is not range from 0 to 1.
  */
 export function linearInterpolation(out: Vec2, v1: Vec2, v2: Vec2, t: number): Vec2 {
-    if (t < 0 || t > 1) {
+    if (!isInRange(0, 1, t)) {
         throw new Error(`interval is ${t}, it should range from 0 to 1.`);
     }
 

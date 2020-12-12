@@ -2,7 +2,7 @@
  * @file Javascript isomorphic 2D affine transformations write in ES6 syntax.
  */
 
-import {Vec2} from "./vector";
+import {Vec2} from './vector';
 
 export type Matrix = [number, number, number, number, number, number];
 

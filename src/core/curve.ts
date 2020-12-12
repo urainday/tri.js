@@ -20,6 +20,16 @@ function isNotAroundZero(val: number): boolean {
     return val > EPSILON || val < -EPSILON;
 }
 
+export function isInRange(min: number, max: number, t: number): boolean {
+    if (t >= min && t <= max) {
+        return true;
+    }
+    if (isAroundZero(t - min) || isAroundZero(t - max)) {
+        return true;
+    }
+    return false;
+}
+
 // quadratic
 
 /**
@@ -41,7 +51,7 @@ export function quadraticAt(
     v2: Vec2,
     t: number
 ): Vec2 {
-    if (t < 0 || t > 1) {
+    if (!isInRange(0, 1, t)) {
         throw new Error(`interval is ${t}, it should range from 0 to 1.`);
     }
 
@@ -67,7 +77,7 @@ export function quadraticDerivativeAt(
     v2: Vec2,
     t: number
 ): Vec2 {
-    if (t < 0 || t > 1) {
+    if (!isInRange(0, 1, t)) {
         throw new Error(`interval is ${t}, it should range from 0 to 1.`);
     }
 
@@ -171,7 +181,7 @@ export function quadraticSubdivide(
     t: number,
     out: Array<Vec2>
 ): void {
-    if (t < 0 || t > 1) {
+    if (!isInRange(0, 1, t)) {
         throw new Error(`interval is ${t}, it should range from 0 to 1.`);
     }
 
@@ -227,30 +237,36 @@ export function quadraticProjectAt(
         if (interval < EPSILON_NUMERIC) {
             break;
         }
+        let changed = false;
         const prevT = pt - interval;
-        const prevV = quadraticAt(v0, v1, v2, prevT);
-        const prevD = vDistance(v, prevV);
-
-        if (prevT >= 0 && prevD < pd) {
-            pt = prevT;
-            pd = prevD;
-        } else {
-            const nextT = pt + interval;
+        if (isInRange(0, 1, prevT)) {
+            const prevV = quadraticAt(v0, v1, v2, prevT);
+            const prevD = vDistance(v, prevV);
+            if (prevT >= 0 && prevD < pd) {
+                pt = prevT;
+                pd = prevD;
+                changed = true;
+            }
+        }
+        const nextT = pt + interval;
+        if (isInRange(0, 1, nextT)) {
             const nextV = quadraticAt(v0, v1, v2, nextT);
             const nextD = vDistance(v, nextV);
             if (nextT <= 1 && nextD < pd) {
                 pt = nextT;
                 pd = nextD;
-            } else {
-                interval *= 0.5;
+                changed = true;
             }
+        }
+        if (!changed) {
+            interval *= 0.5;
         }
     }
 
     const pv = quadraticAt(v0, v1, v2, pt);
     vCopy(out, pv);
 
-    return Math.sqrt(pd);
+    return pd;
 }
 
 
@@ -273,7 +289,7 @@ export function cubicAt(
     v3: Vec2,
     t: number
 ): Vec2 {
-    if (t < 0 || t > 1) {
+    if (!isInRange(0, 1, t)) {
         throw new Error(`interval is ${t}, it should range from 0 to 1.`);
     }
 
@@ -304,7 +320,7 @@ export function cubicDerivativeAt(
     v3: Vec2,
     t: number
 ) {
-    if (t < 0 || t > 1) {
+    if (!isInRange(0, 1, t)) {
         throw new Error(`interval is ${t}, it should range from 0 to 1.`);
     }
 
@@ -484,7 +500,7 @@ export function cubicSubdivide(
     t: number,
     out: Array<Vec2>
 ): void {
-    if (t < 0 || t > 1) {
+    if (!isInRange(0, 1, t)) {
         throw new Error(`interval is ${t}, it should range from 0 to 1.`);
     }
 
@@ -548,23 +564,31 @@ export function cubicProjectAt(
         if (interval < EPSILON_NUMERIC) {
             break;
         }
+        let changed = false;
         const prevT = pt - interval;
-        const prevV = cubicAt(v0, v1, v2, v3, prevT);
-        const prevD = vDistance(v, prevV);
+        if (isInRange(0, 1, prevT)) {
+            const prevV = cubicAt(v0, v1, v2, v3, prevT);
+            const prevD = vDistance(v, prevV);
+            if (prevT >= 0 && prevD < pd) {
+                pt = prevT;
+                pd = prevD;
+                changed = true;
+            }
+        }
 
-        if (prevT >= 0 && prevD < pd) {
-            pt = prevT;
-            pd = prevD;
-        } else {
-            const nextT = pt + interval;
+        const nextT = pt + interval;
+        if (isInRange(0, 1, nextT)) {
             const nextV = cubicAt(v0, v1, v2, v3, nextT);
             const nextD = vDistance(v, nextV);
             if (nextT <= 1 && nextD < pd) {
                 pt = nextT;
                 pd = nextD;
-            } else {
-                interval *= 0.5;
+                changed = true;
             }
+        }
+
+        if (!changed) {
+            interval *= 0.5;
         }
     }
 
