@@ -2,4 +2,3 @@ coverage
 out
 yarn.lock
 package-lock.json
-.cc_token
