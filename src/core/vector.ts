@@ -159,7 +159,7 @@ export function div(out: Vec2, v1: Vec2, v2: Vec2): Vec2 {
  * @param {number} s amount to scale the vector by
  * @return {Vec2} out
  */
-export function scale(out: Vec2, v: Vec2, s: number) {
+export function scale(out: Vec2, v: Vec2, s: number): Vec2 {
     out[0] = v[0] * s;
     out[1] = v[1] * s;
     return out;

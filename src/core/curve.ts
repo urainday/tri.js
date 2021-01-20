@@ -319,7 +319,7 @@ export function cubicDerivativeAt(
     v2: Vec2,
     v3: Vec2,
     t: number
-) {
+): Vec2  {
     if (!isInRange(0, 1, t)) {
         throw new Error(`interval is ${t}, it should range from 0 to 1.`);
     }
